@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vCore-UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: transparent;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ====================================
+           MENU STYLES
+        ==================================== */
+        .vcore-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--bg-dark);
+            border-radius: 16px;
+            min-width: 450px;
+            max-width: 500px;
+            max-height: 80vh;
+            box-shadow: 0 20px 60px var(--shadow);
+            border: 1px solid var(--border);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+        }
+
+        .vcore-menu.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .menu-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .menu-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .menu-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        .menu-items {
+            padding: 12px;
+            max-height: calc(80vh - 120px);
+            overflow-y: auto;
+        }
+
+        .menu-items::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .menu-items::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .menu-items::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .menu-item {
+            padding: 16px 20px;
+            margin: 6px 0;
+            background: var(--bg-card);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .menu-item-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .menu-item-content {
+            flex: 1;
+        }
+
+        .menu-item-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .menu-item-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .menu-item-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* ====================================
+           INPUT STYLES
+        ==================================== */
+        .vcore-input {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--bg-dark);
+            border-radius: 16px;
+            width: 420px;
+            box-shadow: 0 20px 60px var(--shadow);
+            border: 1px solid var(--border);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vcore-input.active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .input-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .input-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            background: var(--bg-hover);
+        }
+
+        .input-actions {
+            padding: 20px 28px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
+        }
+
+        .input-btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .input-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .input-btn-cancel {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+
+        .input-btn-cancel:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        /* ====================================
+           SKILLBAR STYLES
+        ==================================== */
+        .vcore-skillbar {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            width: 500px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vcore-skillbar.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .skillbar-label {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .skillbar-container {
+            position: relative;
+            height: 60px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .skillbar-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: var(--bg-card);
+        }
+
+        .skillbar-success-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(16, 185, 129, 0.2) 0%, 
+                rgba(16, 185, 129, 0.4) 50%, 
+                rgba(16, 185, 129, 0.2) 100%);
+            border-left: 3px solid var(--success);
+            border-right: 3px solid var(--success);
+            transition: all 0.3s ease;
+        }
+
+        .skillbar-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 0 20px var(--primary);
+            transition: left linear;
+        }
+
+        .skillbar-hint {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .skillbar-key {
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* ====================================
+           PROGRESSBAR STYLES
+        ==================================== */
+        .vcore-progressbar {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            width: 400px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vcore-progressbar.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .progressbar-label {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .progressbar-container {
+            position: relative;
+            height: 8px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .progressbar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            transition: width linear;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .progressbar-percentage {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ====================================
+           NOTIFICATION STYLES
+        ==================================== */
+        .vcore-notifications {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 350px;
+            z-index: 10000;
+        }
+
+        .notification {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 8px 30px var(--shadow);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            border-left-color: var(--success);
+        }
+
+        .notification.error {
+            border-left-color: var(--error);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning);
+        }
+
+        .notification.info {
+            border-left-color: var(--info);
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Container -->
+    <div id="menu-container"></div>
+
+    <!-- Input Container -->
+    <div id="input-container"></div>
+
+    <!-- Skillbar Container -->
+    <div id="skillbar-container"></div>
+
+    <!-- Progressbar Container -->
+    <div id="progressbar-container"></div>
+
+    <!-- Notifications Container -->
+    <div class="vcore-notifications" id="notifications-container"></div>
+
+    <script>
+        const VCoreUI = {
+            activeMenu: null,
+            activeInput: null,
+            activeSkillbar: null,
+            activeProgressbar: null,
+
+            // Initialize
+            init() {
+                window.addEventListener('message', (event) => {
+                    const { action, data } = event.data;
+                    
+                    switch(action) {
+                        case 'vcore-ui:open-menu':
+                            this.openMenu(data);
+                            break;
+                        case 'vcore-ui:close-menu':
+                            this.closeMenu(data.id);
+                            break;
+                        case 'vcore-ui:open-input':
+                            this.openInput(data);
+                            break;
+                        case 'vcore-ui:close-input':
+                            this.closeInput(data.id);
+                            break;
+                        case 'vcore-ui:show-skillbar':
+                            this.showSkillbar(data);
+                            break;
+                        case 'vcore-ui:hide-skillbar':
+                            this.hideSkillbar(data.id);
+                            break;
+                        case 'vcore-ui:show-progressbar':
+                            this.showProgressbar(data);
+                            break;
+                        case 'vcore-ui:hide-progressbar':
+                            this.hideProgressbar(data.id);
+                            break;
+                        case 'vcore-ui:notify':
+                            this.notify(data);
+                            break;
+                    }
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (this.activeMenu) {
+                            this.sendCallback('vcore-ui:close', { type: 'menu', id: this.activeMenu });
+                        }
+                        if (this.activeInput) {
+                            this.closeInput(this.activeInput);
+                        }
+                    }
+                    if (this.activeSkillbar && e.key === ' ') {
+                        e.preventDefault();
+                        this.checkSkillbar();
+                    }
+                });
+            },
+
+            // Menu Functions
+            openMenu(data) {
+                const container = document.getElementById('menu-container');
+                this.activeMenu = data.id;
+
+                const itemsHTML = data.items.map((item, index) => `
+                    <div class="menu-item" onclick="VCoreUI.selectMenuItem(${index}, ${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                        ${item.icon ? `<div class="menu-item-icon">${item.icon}</div>` : ''}
+                        <div class="menu-item-content">
+                            <div class="menu-item-label">${item.label}</div>
+                            ${item.description ? `<div class="menu-item-description">${item.description}</div>` : ''}
+                        </div>
+                        ${item.value ? `<div class="menu-item-value">${item.value}</div>` : ''}
+                    </div>
+                `).join('');
+
+                container.innerHTML = `
+                    <div class="vcore-menu" id="menu-${data.id}">
+                        <div class="menu-header">
+                            <div class="menu-title">${data.title}</div>
+                            ${data.subtitle ? `<div class="menu-subtitle">${data.subtitle}</div>` : ''}
+                        </div>
+                        <div class="menu-items">
+                            ${itemsHTML}
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    document.getElementById(`menu-${data.id}`).classList.add('active');
+                }, 10);
+            },
+
+            closeMenu(id) {
+                const menu = document.getElementById(`menu-${id}`);
+                if (menu) {
+                    menu.classList.remove('active');
+                    setTimeout(() => {
+                        document.getElementById('menu-container').innerHTML = '';
+                        this.activeMenu = null;
+                    }, 300);
+                }
+            },
+
+            selectMenuItem(index, item) {
+                this.sendCallback('vcore-ui:select', { 
+                    menuId: this.activeMenu, 
+                    index: index, 
+                    item: item 
+                });
+            },
+
+            // Input Functions
+            openInput(data) {
+                const container = document.getElementById('input-container');
+                this.activeInput = data.id;
+
+                container.innerHTML = `
+                    <div class="vcore-input" id="input-${data.id}">
+                        <div class="input-header">
+                            <div class="input-title">${data.title}</div>
+                            <input 
+                                type="${data.type}" 
+                                class="input-field" 
+                                placeholder="${data.placeholder}"
+                                ${data.maxLength ? `maxlength="${data.maxLength}"` : ''}
+                                value="${data.defaultValue || ''}"
+                                id="input-field-${data.id}"
+                                autofocus
+                            />
+                        </div>
+                        <div class="input-actions">
+                            <button class="input-btn input-btn-cancel" onclick="VCoreUI.closeInput('${data.id}')">
+                                Cancel
+                            </button>
+                            <button class="input-btn input-btn-submit" onclick="VCoreUI.submitInput('${data.id}')">
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    document.getElementById(`input-${data.id}`).classList.add('active');
+                    document.getElementById(`input-field-${data.id}`).focus();
+                }, 10);
+
+                document.getElementById(`input-field-${data.id}`).addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.submitInput(data.id);
+                    }
+                });
+            },
+
+            closeInput(id) {
+                const input = document.getElementById(`input-${id}`);
+                if (input) {
+                    input.classList.remove('active');
+                    setTimeout(() => {
+                        document.getElementById('input-container').innerHTML = '';
+                        this.activeInput = null;
+                    }, 300);
+                }
+            },
+
+            submitInput(id) {
+                const value = document.getElementById(`input-field-${id}`).value;
+                this.sendCallback('vcore-ui:submit', { id: id, value: value });
+                this.closeInput(id);
+            },
+
+            // Skillbar Functions
+            showSkillbar(data) {
+                const container = document.getElementById('skillbar-container');
+                this.activeSkillbar = data.id;
+
+                container.innerHTML = `
+                    <div class="vcore-skillbar" id="skillbar-${data.id}">
+                        ${data.label ? `<div class="skillbar-label">${data.label}</div>` : ''}
+                        <div class="skillbar-container">
+                            <div class="skillbar-track"></div>
+                            <div class="skillbar-success-zone" style="left: ${data.successZone.start}%; width: ${data.successZone.width}%;"></div>
+                            <div class="skillbar-indicator" id="skillbar-indicator-${data.id}"></div>
+                        </div>
+                        <div class="skillbar-hint">
+                            Press <span class="skillbar-key">SPACE</span> when indicator is in the green zone
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    document.getElementById(`skillbar-${data.id}`).classList.add('active');
+                    this.animateSkillbar(data);
+                }, 10);
+            },
+
+            animateSkillbar(data) {
+                const indicator = document.getElementById(`skillbar-indicator-${data.id}`);
+                const startTime = Date.now();
+                
+                const animate = () => {
+                    if (!this.activeSkillbar) return;
+                    
+                    const elapsed = Date.now() - startTime;
+                    const progress = (elapsed % data.duration) / data.duration;
+                    
+                    indicator.style.left = (progress * 100) + '%';
+                    
+                    requestAnimationFrame(animate);
+                };
+                
+                animate();
+            },
+
+            checkSkillbar() {
+                if (!this.activeSkillbar) return;
+                
+                const indicator = document.getElementById(`skillbar-indicator-${this.activeSkillbar}`);
+                const zone = document.querySelector('.skillbar-success-zone');
+                
+                const indicatorPos = parseFloat(indicator.style.left);
+                const zoneStart = parseFloat(zone.style.left);
+                const zoneEnd = zoneStart + parseFloat(zone.style.width);
+                
+                const success = indicatorPos >= zoneStart && indicatorPos <= zoneEnd;
+                
+                this.sendCallback('vcore-ui:skillbar-result', { 
+                    id: this.activeSkillbar, 
+                    success: success 
+                });
+                
+                this.hideSkillbar(this.activeSkillbar);
+            },
+
+            hideSkillbar(id) {
+                const skillbar = document.getElementById(`skillbar-${id}`);
+                if (skillbar) {
+                    skillbar.classList.remove('active');
+                    setTimeout(() => {
+                        document.getElementById('skillbar-container').innerHTML = '';
+                        this.activeSkillbar = null;
+                    }, 300);
+                }
+            },
+
+            // Progressbar Functions
+            showProgressbar(data) {
+                const container = document.getElementById('progressbar-container');
+                this.activeProgressbar = data.id;
+
+                container.innerHTML = `
+                    <div class="vcore-progressbar" id="progressbar-${data.id}">
+                        <div class="progressbar-label">${data.label}</div>
+                        <div class="progressbar-container">
+                            <div class="progressbar-fill" id="progressbar-fill-${data.id}"></div>
+                        </div>
+                        <div class="progressbar-percentage" id="progressbar-percentage-${data.id}">0%</div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    document.getElementById(`progressbar-${data.id}`).classList.add('active');
+                    this.animateProgressbar(data);
+                }, 10);
+            },
+
+            animateProgressbar(data) {
+                const fill = document.getElementById(`progressbar-fill-${data.id}`);
+                const percentage = document.getElementById(`progressbar-percentage-${data.id}`);
+                const startTime = Date.now();
+                
+                const animate = () => {
+                    if (!this.activeProgressbar) return;
+                    
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min((elapsed / data.duration) * 100, 100);
+                    
+                    fill.style.width = progress + '%';
+                    percentage.textContent = Math.floor(progress) + '%';
+                    
+                    if (progress < 100) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                animate();
+            },
+
+            hideProgressbar(id) {
+                const progressbar = document.getElementById(`progressbar-${id}`);
+                if (progressbar) {
+                    progressbar.classList.remove('active');
+                    setTimeout(() => {
+                        document.getElementById('progressbar-container').innerHTML = '';
+                        this.activeProgressbar = null;
+                    }, 300);
+                }
+            },
+
+            // Notification Functions
+            notify(data) {
+                const container = document.getElementById('notifications-container');
+                const id = 'notif-' + Date.now();
+                
+                const notification = document.createElement('div');
+                notification.className = `notification ${data.type}`;
+                notification.id = id;
+                notification.innerHTML = `
+                    <div class="notification-message">${data.message}</div>
+                `;
+                
+                container.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add('show'), 10);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, data.duration);
+            },
+
+            // Utility
+            sendCallback(name, data) {
+                fetch(`https://${GetParentResourceName()}/${name}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            }
+        };
+
+        VCoreUI.init();
+    </script>
+</body>
+</html>
